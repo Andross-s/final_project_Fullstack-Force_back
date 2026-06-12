@@ -9,4 +9,4 @@ const categoriesSchema = new Schema({
   },
 });
 
-export const Categories = model("Category", categoriesSchema);
+export const Categories = model("Category", categoriesSchema, "categories");
