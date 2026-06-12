@@ -6,7 +6,6 @@ const userSchema = new Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     avatar: { type: String, default: null },
-    refreshToken: { type: String, default: null },
     favorites: [{ type: Schema.Types.ObjectId, ref: "recipe" }],
   },
   { timestamps: true },
@@ -15,7 +14,6 @@ const userSchema = new Schema(
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.password;
-  delete obj.refreshToken;
   return obj;
 };
 
