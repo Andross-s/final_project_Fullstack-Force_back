@@ -1,6 +1,27 @@
 import { Schema, model } from "mongoose";
 
-const userSchema = new Schema({});
+const userSchema = new Schema(
+
+  {
+    name: String,
+    email: String,
+    avatar: {
+      type: String,
+      default: null,
+    },
+    followers: {
+      type: [Schema.Types.ObjectId],
+      default: [],
+    },
+    following: {
+      type: [Schema.Types.ObjectId],
+      default: [],
+    },
+  },
+  {
+    versionKey: false,
+  }
+);
 
 // Перевизначаємо метод toJSON
 userSchema.methods.toJSON = function () {
@@ -9,4 +30,4 @@ userSchema.methods.toJSON = function () {
   return obj;
 };
 
-export const User = model("user", userSchema);
+export const User = model("User", userSchema, "users");
