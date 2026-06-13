@@ -19,7 +19,7 @@ export const registerUser = async (req, res, next) => {
   }
 
  
-  if (password.length < 6) {
+  if (password.length < 8) {
     throw createHttpError(400, "Password must be at least 6 characters");
   }
 
