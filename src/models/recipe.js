@@ -20,4 +20,6 @@ const recipeSchema = new Schema(
   { timestamps: true },
 );
 
-export const Recipe = model("recipe", recipeSchema);
+const Recipe = model("recipe", recipeSchema);
+
+export default Recipe;
