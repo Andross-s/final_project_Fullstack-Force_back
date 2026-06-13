@@ -30,7 +30,8 @@
     "express": "^5.2.1",
     "helmet": "^8.2.0",
     "http-errors": "^2.0.1",
-    "mongoose": "^9.7.0"
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.24.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

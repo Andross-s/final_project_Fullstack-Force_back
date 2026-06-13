@@ -1,5 +1,12 @@
-import { Router } from "express";
+import express from "express";
+import { getRecipeById } from "../controllers/recipes/recipesById.js";
+import {
+  validateRecipeId,
+  validateCreateRecipe,
+} from "../validations/index.js";
 
-const recipesRouter = Router();
+const router = express.Router();
 
-export default recipesRouter;
+router.get("/:id", getRecipeById);
+
+export default router;
