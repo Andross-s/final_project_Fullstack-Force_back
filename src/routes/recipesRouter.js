@@ -1,15 +1,13 @@
 import { Router } from "express";
+
+import { createRecipeController } from '../controllers/recipes/createRecipeController.js';
 import { getFavorites } from "../controllers/recipes/getFavorites.js";
-<<<<<<< HEAD
 import { addToFavorites } from "../controllers/recipes/addToFavorites.js";
 import { removeFromFavorites } from "../controllers/recipes/removeFromFavorites.js";
-=======
->>>>>>> origin/main
 import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const recipesRouter = Router();
 
-<<<<<<< HEAD
 recipesRouter.get("/favorites", authMiddleware, getFavorites);
 recipesRouter.post("/favorites/:recipeId", authMiddleware, addToFavorites);
 recipesRouter.delete(
@@ -17,9 +15,13 @@ recipesRouter.delete(
   authMiddleware,
   removeFromFavorites,
 );
-=======
 
-recipesRouter.get("/favorites", authMiddleware, getFavorites);
->>>>>>> origin/main
+recipesRouter.post(
+  '/',
+//   authenticate,
+//   validateBody(createRecipeSchema),
+  createRecipeController,
+);
+
 
 export default recipesRouter;
