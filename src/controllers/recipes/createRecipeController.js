@@ -9,7 +9,7 @@ export const createRecipeController = async (req, res) => {
     
   res.status(201).json({
     status: 201,
-    message: 'Recipe created successfully',
+    message: '✅ Recipe created successfully',
     data: recipe,
   });
 };
