@@ -18,7 +18,7 @@ recipesRouter.delete(
 
 recipesRouter.post(
   '/',
-//   authenticate,
+//   authenticate,                       Тут вставити актуальні назви
 //   validateBody(createRecipeSchema),
   createRecipeController,
 );
