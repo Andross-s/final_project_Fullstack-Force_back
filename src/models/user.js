@@ -1,5 +1,3 @@
-
-
 import mongoose, { Schema } from "mongoose";
 
 const userSchema = new Schema(
@@ -7,37 +5,34 @@ const userSchema = new Schema(
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     email: {
       type: String,
       required: true,
       unique: true,
       trim: true,
-      lowercase: true
+      lowercase: true,
     },
     password: {
       type: String,
-      required: true
+      required: true,
     },
     avatar: {
       type: String,
-      default: "https://ac.goit.global/fullstack/react/default-avatar.jpg"
-    }
+      default: "https://ac.goit.global/fullstack/react/default-avatar.jpg",
+    },
   },
   {
-    timestamps: true
-  }
+    timestamps: true,
+  },
 );
-userSchema.pre("save", function () {
-if (!this.username)
-this.username = this.email;
-});
 
+// Перевизначаємо метод toJSON
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.password;
   return obj;
 };
 
-export const User = mongoose.model("User", userSchema); 
+export const User = mongoose.model("User", userSchema);
