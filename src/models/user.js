@@ -22,13 +22,13 @@ const userSchema = new Schema(
       type: String,
       default: "https://ac.goit.global/fullstack/react/default-avatar.jpg",
     },
+    favorites: [{ type: Schema.Types.ObjectId, ref: "recipe" }],
   },
   {
     timestamps: true,
   },
 );
 
-// Перевизначаємо метод toJSON
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.password;
