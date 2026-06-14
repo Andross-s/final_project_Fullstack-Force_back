@@ -1,6 +1,6 @@
-import { Categories } from "../../models/category";
-import { Ingredient } from "../../models/ingredient";
-import Recipe from "../../models/recipe";
+import { Categories } from "../../models/category.js";
+import { Ingredient } from "../../models/ingredient.js";
+import Recipe from "../../models/recipe.js";
 
 export const getRecipes = async (req, res) => {
   const { page = 1, perPage = 10, category, ingredient, search } = req.query;
