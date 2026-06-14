@@ -18,4 +18,6 @@ const recipeSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-export default mongoose.model("Recipe", recipeSchema, "recipes");
+const Recipe = model("recipe", recipeSchema);
+
+export default Recipe;
