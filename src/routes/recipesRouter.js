@@ -31,6 +31,10 @@ recipesRouter.delete(
   removeFromFavorites,
 );
 
-recipesRouter.post("/");
+recipesRouter.post(
+  "/", //   authenticate,                       Тут вставити актуальні назви
+  //   validateBody(createRecipeSchema),
+  createRecipeController,
+);
 
 export default recipesRouter;
