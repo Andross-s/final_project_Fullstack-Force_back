@@ -18,8 +18,6 @@ import { getOwnerRecipesSchema } from "../validations/recipe.js";
 
 const recipesRouter = Router();
 
-recipesRouter.get("/:id", getRecipeById);
-
 recipesRouter.get(
   "/own",
   authMiddleware,
@@ -40,5 +38,7 @@ recipesRouter.post(
   //   validateBody(createRecipeSchema),
   createRecipeController,
 );
+
+recipesRouter.get("/:id", getRecipeById);
 
 export default recipesRouter;
