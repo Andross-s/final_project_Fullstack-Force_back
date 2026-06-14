@@ -1,6 +1,10 @@
 import { Router } from "express";
 import { celebrate } from "celebrate";
-
+import { getRecipeById } from "../controllers/recipes/recipesById.js";
+import {
+  validateRecipeId,
+  validateCreateRecipe,
+} from "../validations/index.js";
 import { createRecipeController } from "../controllers/recipes/createRecipeController.js";
 import { getFavorites } from "../controllers/recipes/getFavorites.js";
 import { addToFavorites } from "../controllers/recipes/addToFavorites.js";
@@ -14,12 +18,7 @@ import { getOwnerRecipesSchema } from "../validations/recipe.js";
 
 const recipesRouter = Router();
 
-recipesRouter.get(
-  "/own",
-  authMiddleware,
-  celebrate(getOwnerRecipesSchema),
-  getOwnerRecipes,
-);
+recipesRouter.get("/:id", getRecipeById);
 
 recipesRouter.get(
   "/own",
@@ -27,7 +26,6 @@ recipesRouter.get(
   celebrate(getOwnerRecipesSchema),
   getOwnerRecipes,
 );
-
 recipesRouter.get("/", celebrate(getRecipesSchema), getRecipes);
 recipesRouter.get("/favorites", authMiddleware, getFavorites);
 recipesRouter.post("/favorites/:recipeId", authMiddleware, addToFavorites);
@@ -37,11 +35,6 @@ recipesRouter.delete(
   removeFromFavorites,
 );
 
-recipesRouter.post(
-  "/",
-  //   authenticate,                       Тут вставити актуальні назви
-  //   validateBody(createRecipeSchema),
-  createRecipeController,
-);
+recipesRouter.post("/");
 
 export default recipesRouter;
