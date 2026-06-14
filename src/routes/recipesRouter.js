@@ -5,7 +5,12 @@ import {
   validateRecipeId,
   validateCreateRecipe,
 } from "../validations/index.js";
+
 import { createRecipeController } from "../controllers/recipes/createRecipeController.js";
+import { createRecipeSchema } from "../validations/recipe.js"
+import { upload } from "../middleware/multerRecipe.js";
+
+
 import { getFavorites } from "../controllers/recipes/getFavorites.js";
 import { addToFavorites } from "../controllers/recipes/addToFavorites.js";
 import { removeFromFavorites } from "../controllers/recipes/removeFromFavorites.js";
@@ -33,11 +38,7 @@ recipesRouter.delete(
   removeFromFavorites,
 );
 
-recipesRouter.post(
-  "/", //   authenticate,                       Тут вставити актуальні назви
-  //   validateBody(createRecipeSchema),
-  createRecipeController,
-);
+recipesRouter.post("/", authMiddleware, upload.single("photo"), celebrate(createRecipeSchema), createRecipeController);
 
 recipesRouter.get("/:id", getRecipeById);
 
