@@ -10,6 +10,9 @@ import { getFavorites } from "../controllers/recipes/getFavorites.js";
 import { addToFavorites } from "../controllers/recipes/addToFavorites.js";
 import { removeFromFavorites } from "../controllers/recipes/removeFromFavorites.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import { getRecipes } from "../controllers/recipes/getRecipes.js";
+import { getRecipesSchema } from "../validations/recipe.js";
+
 import { getOwnerRecipes } from "../controllers/recipes/ownerRecipes.js";
 import { getOwnerRecipesSchema } from "../validations/recipe.js";
 
@@ -23,6 +26,7 @@ recipesRouter.get(
   celebrate(getOwnerRecipesSchema),
   getOwnerRecipes,
 );
+recipesRouter.get("/", celebrate(getRecipesSchema), getRecipes);
 recipesRouter.get("/favorites", authMiddleware, getFavorites);
 recipesRouter.post("/favorites/:recipeId", authMiddleware, addToFavorites);
 recipesRouter.delete(
