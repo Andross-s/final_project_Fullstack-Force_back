@@ -8,7 +8,11 @@ const recipeSchema = new Schema(
     thumb: { type: String },
     time: { type: Number },
     calories: { type: Number, default: null },
-    category: { type: Schema.Types.ObjectId, ref: "category", required: true },
+    categories: {
+      type: Schema.Types.ObjectId,
+      ref: "category",
+      required: true,
+    },
     owner: { type: Schema.Types.ObjectId, ref: "user", default: null },
     ingredients: [
       {
