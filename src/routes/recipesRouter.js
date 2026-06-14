@@ -9,7 +9,24 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 import { getRecipes } from "../controllers/recipes/getRecipes.js";
 import { getRecipesSchema } from "../validations/recipe.js";
 
+import { getOwnerRecipes } from "../controllers/recipes/ownerRecipes.js";
+import { getOwnerRecipesSchema } from "../validations/recipe.js";
+
 const recipesRouter = Router();
+
+recipesRouter.get(
+  "/own",
+  authMiddleware,
+  celebrate(getOwnerRecipesSchema),
+  getOwnerRecipes,
+);
+
+recipesRouter.get(
+  "/own",
+  authMiddleware,
+  celebrate(getOwnerRecipesSchema),
+  getOwnerRecipes,
+);
 
 recipesRouter.get("/", celebrate(getRecipesSchema), getRecipes);
 recipesRouter.get("/favorites", authMiddleware, getFavorites);
