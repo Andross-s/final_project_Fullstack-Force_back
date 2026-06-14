@@ -1,19 +1,17 @@
-import { Schema, model } from "mongoose";
+import mongoose from "mongoose";
 
-const recipeSchema = new Schema(
+const recipeSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true },
-    description: { type: String },
-    instructions: { type: String },
-    thumb: { type: String },
-    time: { type: Number },
-    calories: { type: Number, default: null },
-    category: { type: Schema.Types.ObjectId, ref: "category", required: true },
-    owner: { type: Schema.Types.ObjectId, ref: "user", default: null },
+    title: String,
+    category: String,
+    instructions: String,
+    description: String,
+    area: String,
+    time: Number,
     ingredients: [
       {
-        ingredient: { type: Schema.Types.ObjectId, ref: "ingredient" },
-        amount: { type: String },
+        name: String,
+        measure: String,
       },
     ],
   },
