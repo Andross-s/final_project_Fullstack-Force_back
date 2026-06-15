@@ -5,7 +5,12 @@ const recipeSchema = new Schema(
     title: { type: String, required: true },
     description: { type: String },
     instructions: { type: String },
-    thumb: { type: String },
+    thumb: {
+      type: String,
+      required: null,
+      default:
+        "https://res.cloudinary.com/dkiruwtcx/image/upload/q_auto/f_auto/v1781512091/Photo_dkn9mn.png",
+    },
     time: { type: Number },
     calories: { type: Number, default: null },
     categories: {

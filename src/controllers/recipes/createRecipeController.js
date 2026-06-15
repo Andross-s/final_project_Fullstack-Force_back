@@ -1,30 +1,26 @@
 import createHttpError from "http-errors";
-import { v2 as cloudinary } from "cloudinary";
-import streamifier from "streamifier";
 import { createRecipe } from "../../services/recipes.js";
+import { saveFileToCloudinary } from "../../utils/saveFileToCloudinary.js";
 
 export const createRecipeController = async (req, res, next) => {
+  const { file, user } = req;
   try {
-    if (!req.file) {
+    if (!file) {
       throw createHttpError(400, "No photo");
     }
 
-    const result = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: "recipes" },
-        (error, result) => {
-          if (error) return reject(error);
-          resolve(result);
-        }
-      );
-
-      streamifier.createReadStream(req.file.buffer).pipe(stream);
+    const publicId = `recipe_${user._id}_${Date.now()}`;
+    const result = await saveFileToCloudinary(file.buffer, publicId, {
+      folder: "recipes",
+      public_id: publicId,
+      overwrite: false,
+      unique_filename: true,
     });
 
     const recipe = await createRecipe({
       ...req.body,
-      owner: req.user._id,
-      photo: result.secure_url,
+      owner: user._id,
+      thumb: result.secure_url,
     });
 
     res.status(201).json({
@@ -36,5 +32,3 @@ export const createRecipeController = async (req, res, next) => {
     next(error);
   }
 };
-
-

@@ -9,6 +9,7 @@ import {
 import { createRecipeController } from "../controllers/recipes/createRecipeController.js";
 import { createRecipeSchema } from "../validations/recipe.js"
 import { upload } from "../middleware/multerRecipe.js";
+import { parseRecipeFormData } from "../middleware/parseRecipeFormData.js";
 
 
 import { getFavorites } from "../controllers/recipes/getFavorites.js";
@@ -38,7 +39,14 @@ recipesRouter.delete(
   removeFromFavorites,
 );
 
-recipesRouter.post("/", authMiddleware, upload.single("photo"), celebrate(createRecipeSchema), createRecipeController);
+recipesRouter.post(
+  "/",
+  authMiddleware,
+  upload.single("photo"),
+  parseRecipeFormData,
+  celebrate(createRecipeSchema),
+  createRecipeController,
+);
 
 recipesRouter.get("/:id", getRecipeById);
 
