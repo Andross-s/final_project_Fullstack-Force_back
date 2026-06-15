@@ -4,8 +4,23 @@ export const createRecipeSchema = {
   [Segments.BODY]: Joi.object({
     title: Joi.string().required(),
     description: Joi.string().required(),
-    ingredients: Joi.array().items(Joi.string()).required(),
+    ingredients: Joi.array()
+      .items(
+        Joi.object({
+          ingredient: Joi.string().hex().length(24).required(),
+          amount: Joi.string().required(),
+        }),
+      )
+      .min(1)
+      .required(),
     instructions: Joi.string().required(),
+
+    // Додаємо categories (повинно збігатися з назвою поля в моделі)
+    categories: Joi.string().hex().length(24).required(),
+
+    photo: Joi.string().uri().optional(),
+    time: Joi.number().integer().min(1).optional(),
+    calories: Joi.number().optional(),
   }),
 };
 export const getOwnerRecipesSchema = {
