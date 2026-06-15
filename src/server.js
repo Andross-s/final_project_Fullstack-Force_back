@@ -4,6 +4,8 @@ import helmet from "helmet";
 import "dotenv/config";
 import { errors } from "celebrate";
 import cookieParser from "cookie-parser";
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "./swagger-output.json" with { type: "json" };
 
 import { connectMongoDB } from "./db/connectMongoDB.js";
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -30,6 +32,8 @@ app.use(
 );
 app.use(cookieParser());
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 app.use("/api/auth", authRouter);
 app.use("/api/user", usersRouter);
 app.use("/api/categories", categoriesRouter);
@@ -50,4 +54,5 @@ await connectMongoDB();
 // Запуск сервера
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log(`Swagger UI available at http://localhost:${PORT}/api-docs`);
 });
