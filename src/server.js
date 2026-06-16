@@ -20,16 +20,31 @@ import recipesRouter from "./routes/recipesRouter.js";
 const app = express();
 const PORT = process.env.PORT ?? 3000;
 
-// // Middleware
+const allowedOrigins = [
+  "https://vercel.app", // фронтенд на Vercel
+  "http://localhost:5173",
+  "http://localhost:3000",
+];
 
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Дозволяємо запити без origin (наприклад, Postman або мобільні додатки)
+    // або якщо домен є у списку дозволених
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Blocked by CORS"));
+    }
+  },
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true, //фронтенд шле куки або сесії
+  optionsSuccessStatus: 204,
+};
+
+// // Middleware
 app.use(helmet());
 app.use(express.json({ limit: "5mb" }));
-app.use(
-  cors({
-    methods: ["GET", "POST", "PATCH", "DELETE"],
-    origin: "*",
-  }),
-);
+app.use(cors(corsOptions));
 app.use(cookieParser());
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
