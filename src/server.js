@@ -22,6 +22,7 @@ const PORT = process.env.PORT ?? 3000;
 
 const allowedOrigins = [
   "https://vercel.app", // фронтенд на Vercel
+  "https://final-project-fullstack-force-back-r48i.onrender.com",
   "http://localhost:5173",
   "http://localhost:3000",
 ];
