@@ -327,6 +327,61 @@ const doc = {
           data: { $ref: "#/components/schemas/Recipe" },
         },
       },
+      CreateRecipeRequest: {
+        type: "object",
+        required: [
+          "title",
+          "description",
+          "ingredients",
+          "instructions",
+          "categories",
+          "photo",
+        ],
+        properties: {
+          title: {
+            type: "string",
+            description: "Recipe title.",
+            example: "Chicken Soup",
+          },
+          description: {
+            type: "string",
+            description: "Short recipe description.",
+            example: "Simple homemade chicken soup.",
+          },
+          ingredients: {
+            type: "string",
+            description:
+              'JSON string with recipe ingredients. Each item must contain ingredient ObjectId and amount, for example: [{"ingredient":"665f1f77bcf86cd799439011","amount":"200 g"}].',
+            example:
+              '[{"ingredient":"665f1f77bcf86cd799439011","amount":"200 g"}]',
+          },
+          instructions: {
+            type: "string",
+            description: "Step-by-step cooking instructions.",
+            example: "Boil chicken, add vegetables, season and serve.",
+          },
+          categories: {
+            ...objectId,
+            description: "Recipe category ObjectId.",
+          },
+          time: {
+            type: "integer",
+            minimum: 1,
+            description: "Cooking time in minutes.",
+            example: 45,
+          },
+          calories: {
+            type: "number",
+            description: "Approximate calories per serving.",
+            example: 320,
+          },
+          photo: {
+            type: "string",
+            format: "binary",
+            description: "Recipe image file. Allowed formats: JPEG, PNG, WebP. Max size: 5 MB.",
+          },
+        },
+      },
       MessageResponse: {
         type: "object",
         properties: {
@@ -593,43 +648,7 @@ const doc = {
           required: true,
           content: {
             "multipart/form-data": {
-              schema: {
-                type: "object",
-                required: [
-                  "title",
-                  "description",
-                  "ingredients",
-                  "instructions",
-                  "categories",
-                  "photo",
-                ],
-                properties: {
-                  title: { type: "string", example: "Chicken Soup" },
-                  description: {
-                    type: "string",
-                    example: "Simple homemade chicken soup.",
-                  },
-                  ingredients: {
-                    type: "string",
-                    description:
-                      'JSON string: [{"ingredient":"665f1f77bcf86cd799439011","amount":"200 g"}]',
-                    example:
-                      '[{"ingredient":"665f1f77bcf86cd799439011","amount":"200 g"}]',
-                  },
-                  instructions: {
-                    type: "string",
-                    example: "Boil chicken, add vegetables, season and serve.",
-                  },
-                  categories: objectId,
-                  time: { type: "integer", minimum: 1, example: 45 },
-                  calories: { type: "number", example: 320 },
-                  photo: {
-                    type: "string",
-                    format: "binary",
-                    description: "Image file: JPEG, PNG, or WebP. Max 5 MB.",
-                  },
-                },
-              },
+              schema: { $ref: "#/components/schemas/CreateRecipeRequest" },
               encoding: {
                 photo: {
                   contentType: "image/jpeg, image/png, image/webp",
