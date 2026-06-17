@@ -65,6 +65,12 @@ app.use(errors());
 // Middleware для обробки помилок
 app.use(errorHandler);
 
+app.use((err, req, res, next) => {
+  console.error("[ERROR]", err);
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({ message: err.message || "Internal Server Error" });
+});
+
 await connectMongoDB();
 
 // Запуск сервера
