@@ -1,29 +1,32 @@
-import createHttpError from 'http-errors';
-import { User } from '../../models/user.js';
+import createHttpError from "http-errors";
+import { User } from "../../models/user.js";
 
-export const getUserById = async (req, res) => {
-  const { userId } = req.params;
+export const getUserById = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return next(createHttpError(401, "Not authorized"));
+    }
 
- console.log('PARAMS:', req.params);
+    const { userId } = req.params;
+    const user = await User.findById(userId).select("-password");
 
-  const user = await User.findById(userId);
+    if (!user) {
+      return next(createHttpError(404, "User not found"));
+    }
 
-    console.log('USER:', user);
-
-  if (!user) {
-    throw createHttpError(404, 'User not found');
+    return res.status(200).json({
+      status: 200,
+      message: "Successfully found current user",
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        followers: user.followers,
+        following: user.following,
+      },
+    });
+  } catch (error) {
+    next(error);
   }
-
-  res.status(200).json({
-    status: 200,
-    message: 'Successfully found current user',
-    data: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      avatar: user.avatar,
-      followers: user.followers,
-      following: user.following,
-    },
-  });
 };
