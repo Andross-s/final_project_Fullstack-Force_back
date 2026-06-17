@@ -5,6 +5,11 @@ import { saveFileToCloudinary } from "../../utils/saveFileToCloudinary.js";
 export const createRecipeController = async (req, res, next) => {
   const { file, user } = req;
   try {
+    // Захист: переконатись, що middleware встановив req.user
+    if (!user || !user._id) {
+      return next(createHttpError(401, "Not authenticated"));
+    }
+
     if (!file) {
       throw createHttpError(400, "No photo");
     }

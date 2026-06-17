@@ -3,30 +3,38 @@ import { Session } from "../models/session.js";
 import { User } from "../models/user.js";
 
 export const authMiddleware = async (req, res, next) => {
-  const { sessionId, accessToken } = req.cookies;
+  try {
+    const { sessionId, accessToken } = req.cookies ?? {};
 
-  if (!sessionId || !accessToken) {
-    throw createHttpError(401, "Unauthorized");
+    if (!sessionId || !accessToken) {
+      return next(createHttpError(401, "Unauthorized"));
+    }
+
+    const session = await Session.findOne({ _id: sessionId, accessToken });
+
+    if (!session) {
+      return next(createHttpError(401, "Session not found"));
+    }
+
+    if (
+      session.accessTokenValidUntil &&
+      session.accessTokenValidUntil < new Date()
+    ) {
+      await session.deleteOne();
+      res.clearCookie("sessionId");
+      res.clearCookie("accessToken");
+      res.clearCookie("refreshToken");
+      return next(createHttpError(401, "Access token expired"));
+    }
+
+    const user = await User.findById(session.userId);
+    if (!user) {
+      return next(createHttpError(401, "User not found"));
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    next(error);
   }
-
-  const session = await Session.findOne({ _id: sessionId, accessToken });
-
-  if (!session) {
-    throw createHttpError(401, "Session not found");
-  }
-
-  const isAccessTokenExpired = session.accessTokenValidUntil < new Date();
-
-  if (isAccessTokenExpired) {
-    throw createHttpError(401, "Access token expired");
-  }
-
-  const user = await User.findById(session.userId);
-
-  if (!user) {
-    throw createHttpError(401, "User not found");
-  }
-
-  req.user = user;
-  next();
 };
