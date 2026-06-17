@@ -15,8 +15,6 @@ import { getOwnerRecipesSchema } from "../validations/recipe.js";
 
 const recipesRouter = Router();
 
-recipesRouter.get("/:id", getRecipeById);
-
 recipesRouter.get(
   "/own",
   authMiddleware,
@@ -30,7 +28,6 @@ recipesRouter.delete(
   authMiddleware,
   removeFromFavorites,
 );
-
-recipesRouter.post("/");
+recipesRouter.get("/:id", validateRecipeId, getRecipeById);
 
 export default recipesRouter;

@@ -1,4 +1,4 @@
-import { Joi, Segments } from 'celebrate';
+import { Joi, Segments } from "celebrate";
 
 export const createRecipeSchema = {
   [Segments.BODY]: Joi.object({
@@ -15,5 +15,10 @@ export const getOwnerRecipesSchema = {
     perPage: Joi.number().integer().min(4).max(20).default(12),
     category: Joi.string().trim(),
     search: Joi.string().trim().allow(""),
+  }),
+};
+export const validateRecipeIdSchema = {
+  [Segments.PARAMS]: Joi.object({
+    id: Joi.string().hex().length(24).required(),
   }),
 };
