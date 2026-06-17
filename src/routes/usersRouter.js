@@ -3,13 +3,15 @@ import { celebrate } from "celebrate";
 
 import { getUserById } from "../controllers/users/getUserById.js";
 import { getUserByIdSchema } from "../validations/users.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const usersRouter = Router();
 
-// Підключити middleware авторизації після реалізації auth-модуля.
-// Поки авторизація не реалізована, ендпоінт не може бути приватним.
-// Після завершення auth-модуля достатньо додати authenticate до роуту.
-
-usersRouter.get('/:userId',/* authenticate,*/ celebrate(getUserByIdSchema), getUserById);
+usersRouter.get(
+  "/:userId",
+  authMiddleware,
+  celebrate(getUserByIdSchema),
+  getUserById,
+);
 
 export default usersRouter;

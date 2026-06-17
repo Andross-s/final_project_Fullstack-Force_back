@@ -6,7 +6,7 @@ export const authMiddleware = async (req, res, next) => {
   const { sessionId, accessToken } = req.cookies;
 
   if (!sessionId || !accessToken) {
-    throw createHttpError(401, "Missing session credentials");
+    throw createHttpError(401, "Unauthorized");
   }
 
   const session = await Session.findOne({ _id: sessionId, accessToken });
