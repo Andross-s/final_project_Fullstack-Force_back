@@ -378,7 +378,8 @@ const doc = {
           photo: {
             type: "string",
             format: "binary",
-            description: "Recipe image file. Allowed formats: JPEG, PNG, WebP. Max size: 5 MB.",
+            description:
+              "Recipe image file. Allowed formats: JPEG, PNG, WebP. Max size: 5 MB.",
           },
         },
       },
@@ -558,6 +559,7 @@ const doc = {
               },
             },
           },
+          ...unauthorizedResponses, // <-- додає 401 відповіді (missing/session not found/expired)
           404: {
             description: "User not found.",
             content: {

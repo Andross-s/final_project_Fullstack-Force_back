@@ -793,6 +793,33 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized. Missing, invalid, or expired session cookies.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingSession": {
+                    "value": {
+                      "message": "Missing session credentials"
+                    }
+                  },
+                  "sessionNotFound": {
+                    "value": {
+                      "message": "Session not found"
+                    }
+                  },
+                  "expired": {
+                    "value": {
+                      "message": "Access token expired"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "404": {
             "description": "User not found.",
             "content": {
