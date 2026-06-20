@@ -9,13 +9,11 @@ export const getRecipes = async (req, res) => {
   const recipesQuery = Recipe.find();
 
   if (category) {
-    const exists = await Categories.exists({ name: category });
-    if (!exists) {
+    const dbCategory = await Categories.findOne({ name: category });
+    if (!dbCategory) {
       return res.status(400).json({ message: "Invalid category" });
     } else {
-      recipesQuery
-        .where("category")
-        .equals(Categories.find({ name: category }));
+      recipesQuery.where("category").equals(dbCategory.name);
     }
   }
 
