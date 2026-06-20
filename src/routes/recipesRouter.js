@@ -7,10 +7,9 @@ import {
 } from "../validations/index.js";
 
 import { createRecipeController } from "../controllers/recipes/createRecipeController.js";
-import { createRecipeSchema } from "../validations/recipe.js"
+import { createRecipeSchema } from "../validations/recipe.js";
 import { upload } from "../middleware/multerRecipe.js";
 import { parseRecipeFormData } from "../middleware/parseRecipeFormData.js";
-
 
 import { getFavorites } from "../controllers/recipes/getFavorites.js";
 import { addToFavorites } from "../controllers/recipes/addToFavorites.js";
