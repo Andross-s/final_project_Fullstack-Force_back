@@ -1,6 +1,7 @@
 import { Categories } from "../../models/category.js";
 import { Ingredient } from "../../models/ingredient.js";
 import Recipe from "../../models/recipe.js";
+import { escapeRegExp } from "../../utils/escapeRegExp.js";
 
 export const getRecipes = async (req, res) => {
   try {
@@ -39,24 +40,26 @@ export const getRecipes = async (req, res) => {
     // 🧂 ФІЛЬТР ЗА ІНГРЕДІЄНТОМ
     // ================================
     if (ingredient) {
-      // 1️⃣ Знаходимо інгредієнт за назвою
-      const ing = await Ingredient.findOne({
-        name: { $regex: ingredient, $options: "i" },
+      // 1️⃣ Знаходимо всі інгредієнти, що збігаються за назвою
+      const matchingIngredients = await Ingredient.find({
+        name: { $regex: escapeRegExp(ingredient), $options: "i" },
       });
 
-      if (!ing) {
+      if (matchingIngredients.length === 0) {
         return res.status(400).json({ message: "Ingredient not found" });
       }
 
-      // 2️⃣ Фільтруємо рецепти за ObjectId інгредієнта
-      filter["ingredients.ingredient"] = ing._id;
+      // 2️⃣ Фільтруємо рецепти за ObjectId будь-якого зі знайдених інгредієнтів
+      filter["ingredients.ingredient"] = {
+        $in: matchingIngredients.map((ing) => ing._id),
+      };
     }
 
     // ================================
     // 🔍 ПОШУК ЗА НАЗВОЮ РЕЦЕПТА
     // ================================
     if (search) {
-      filter.title = { $regex: search, $options: "i" };
+      filter.title = { $regex: escapeRegExp(search), $options: "i" };
     }
 
     // ================================

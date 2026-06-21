@@ -278,9 +278,13 @@
         "type": "object",
         "properties": {
           "ingredient": {
-            "type": "string",
-            "pattern": "^[0-9a-fA-F]{24}$",
-            "example": "665f1f77bcf86cd799439011"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Ingredient"
+              }
+            ],
+            "nullable": true,
+            "description": "Populated ingredient document. May be null if the stored reference no longer matches an existing ingredient."
           },
           "amount": {
             "type": "string",
@@ -323,9 +327,12 @@
             "example": 320
           },
           "category": {
-            "type": "string",
-            "pattern": "^[0-9a-fA-F]{24}$",
-            "example": "665f1f77bcf86cd799439011"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Category"
+              }
+            ],
+            "description": "Populated category document."
           },
           "owner": {
             "type": "string",
@@ -851,6 +858,19 @@
               }
             }
           },
+          "404": {
+            "description": "No categories found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Categories not found"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error.",
             "content": {
@@ -883,6 +903,19 @@
                   "items": {
                     "$ref": "#/components/schemas/Ingredient"
                   }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No ingredients found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Ingredients not found"
                 }
               }
             }
@@ -949,7 +982,7 @@
               "type": "string",
               "example": "Chicken"
             },
-            "description": "Ingredient name (case-insensitive, partial match)."
+            "description": "Ingredient name (case-insensitive, partial match). Matches recipes containing any ingredient whose name contains this substring; special regex characters are treated as literal text."
           },
           {
             "name": "search",
@@ -958,7 +991,7 @@
               "type": "string",
               "example": "soup"
             },
-            "description": "Case-insensitive search by recipe title."
+            "description": "Case-insensitive search by recipe title (partial match). Special regex characters are treated as literal text."
           },
           {
             "name": "maxTime",
@@ -1241,7 +1274,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Case-insensitive search by recipe title."
+            "description": "Case-insensitive search by recipe title (partial match). Special regex characters are treated as literal text."
           }
         ],
         "responses": {

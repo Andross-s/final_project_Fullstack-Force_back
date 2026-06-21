@@ -1,5 +1,6 @@
 import Recipe from '../../models/recipe.js';
 import createHttpError from 'http-errors';
+import { escapeRegExp } from '../../utils/escapeRegExp.js';
 
 export const getOwnerRecipes = async (req, res) => {
 
@@ -25,7 +26,7 @@ export const getOwnerRecipes = async (req, res) => {
     // пошук за пошуковим запитом
     if (search) {
         recipesQuery.where({
-            title: { $regex: search, $options: "i" },
+            title: { $regex: escapeRegExp(search), $options: "i" },
         });
     }
 
