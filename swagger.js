@@ -97,20 +97,34 @@ const recipeQueryParameters = [
   {
     name: "category",
     in: "query",
-    schema: { type: "string", example: "Breakfast" },
-    description: "Category name.",
+    schema: objectId,
+    description: "Category ObjectId. Must reference an existing category.",
   },
   {
     name: "ingredient",
     in: "query",
     schema: { type: "string", example: "Chicken" },
-    description: "Ingredient name.",
+    description:
+      "Ingredient name (case-insensitive, partial match). Matches recipes containing any ingredient whose name contains this substring; special regex characters are treated as literal text.",
   },
   {
     name: "search",
     in: "query",
     schema: { type: "string", example: "soup" },
-    description: "Case-insensitive search by recipe title.",
+    description:
+      "Case-insensitive search by recipe title (partial match). Special regex characters are treated as literal text.",
+  },
+  {
+    name: "maxTime",
+    in: "query",
+    schema: { type: "integer", minimum: 1, example: 30 },
+    description: "Maximum cooking time in minutes.",
+  },
+  {
+    name: "maxCalories",
+    in: "query",
+    schema: { type: "number", minimum: 0, example: 500 },
+    description: "Maximum calories per serving.",
   },
 ];
 
@@ -205,8 +219,6 @@ const doc = {
                 example: "john@mail.com",
               },
               avatar: { type: "string", format: "uri" },
-              followers: { type: "array", items: objectId, nullable: true },
-              following: { type: "array", items: objectId, nullable: true },
             },
           },
         },
@@ -269,7 +281,12 @@ const doc = {
       RecipeIngredient: {
         type: "object",
         properties: {
-          ingredient: objectId,
+          ingredient: {
+            allOf: [{ $ref: "#/components/schemas/Ingredient" }],
+            nullable: true,
+            description:
+              "Populated ingredient document. May be null if the stored reference no longer matches an existing ingredient.",
+          },
           amount: { type: "string", example: "200 g" },
         },
       },
@@ -293,7 +310,10 @@ const doc = {
           },
           time: { type: "integer", example: 45 },
           calories: { type: "number", nullable: true, example: 320 },
-          categories: objectId,
+          category: {
+            allOf: [{ $ref: "#/components/schemas/Category" }],
+            description: "Populated category document.",
+          },
           owner: { ...objectId, nullable: true },
           ingredients: {
             type: "array",
@@ -334,7 +354,7 @@ const doc = {
           "description",
           "ingredients",
           "instructions",
-          "categories",
+          "category",
           "photo",
         ],
         properties: {
@@ -360,7 +380,7 @@ const doc = {
             description: "Step-by-step cooking instructions.",
             example: "Boil chicken, add vegetables, season and serve.",
           },
-          categories: {
+          category: {
             ...objectId,
             description: "Recipe category ObjectId.",
           },
@@ -378,7 +398,8 @@ const doc = {
           photo: {
             type: "string",
             format: "binary",
-            description: "Recipe image file. Allowed formats: JPEG, PNG, WebP. Max size: 5 MB.",
+            description:
+              "Recipe image file. Allowed formats: JPEG, PNG, WebP. Max size: 5 MB.",
           },
         },
       },
@@ -558,6 +579,7 @@ const doc = {
               },
             },
           },
+          ...unauthorizedResponses, // <-- додає 401 відповіді (missing/session not found/expired)
           404: {
             description: "User not found.",
             content: {
@@ -587,6 +609,15 @@ const doc = {
               },
             },
           },
+          404: {
+            description: "No categories found.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Error" },
+                example: { message: "Categories not found" },
+              },
+            },
+          },
           ...serverErrorResponse,
         },
       },
@@ -607,6 +638,15 @@ const doc = {
               },
             },
           },
+          404: {
+            description: "No ingredients found.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Error" },
+                example: { message: "Ingredients not found" },
+              },
+            },
+          },
           ...serverErrorResponse,
         },
       },
@@ -616,20 +656,32 @@ const doc = {
         tags: ["Recipes"],
         summary: "Search recipes",
         description:
-          "Searches recipes by category, ingredient, and title with pagination.",
+          "Searches recipes by category, ingredient, title, max cooking time, and max calories, with pagination.",
         parameters: recipeQueryParameters,
         responses: {
           200: recipeListResponse,
           400: {
             description:
-              "Invalid category, ingredient not found, or validation error.",
+              "Invalid category, ingredient not found, or query validation error (e.g. invalid page/perPage/maxTime/maxCalories).",
             content: {
               "application/json": {
-                schema: { $ref: "#/components/schemas/Error" },
+                schema: {
+                  oneOf: [
+                    { $ref: "#/components/schemas/Error" },
+                    { $ref: "#/components/schemas/ValidationError" },
+                  ],
+                },
                 examples: {
                   invalidCategory: { value: { message: "Invalid category" } },
                   ingredientNotFound: {
                     value: { message: "Ingredient not found" },
+                  },
+                  queryValidation: {
+                    value: {
+                      statusCode: 400,
+                      error: "Bad Request",
+                      message: '"maxTime" must be a number',
+                    },
                   },
                 },
               },
@@ -726,12 +778,15 @@ const doc = {
           {
             name: "category",
             in: "query",
-            schema: { type: "string" },
+            schema: objectId,
+            description: "Category ObjectId.",
           },
           {
             name: "search",
             in: "query",
             schema: { type: "string" },
+            description:
+              "Case-insensitive search by recipe title (partial match). Special regex characters are treated as literal text.",
           },
         ],
         responses: {

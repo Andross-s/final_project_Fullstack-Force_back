@@ -172,24 +172,6 @@
               "avatar": {
                 "type": "string",
                 "format": "uri"
-              },
-              "followers": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "pattern": "^[0-9a-fA-F]{24}$",
-                  "example": "665f1f77bcf86cd799439011"
-                },
-                "nullable": true
-              },
-              "following": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "pattern": "^[0-9a-fA-F]{24}$",
-                  "example": "665f1f77bcf86cd799439011"
-                },
-                "nullable": true
               }
             }
           }
@@ -296,9 +278,13 @@
         "type": "object",
         "properties": {
           "ingredient": {
-            "type": "string",
-            "pattern": "^[0-9a-fA-F]{24}$",
-            "example": "665f1f77bcf86cd799439011"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Ingredient"
+              }
+            ],
+            "nullable": true,
+            "description": "Populated ingredient document. May be null if the stored reference no longer matches an existing ingredient."
           },
           "amount": {
             "type": "string",
@@ -340,10 +326,13 @@
             "nullable": true,
             "example": 320
           },
-          "categories": {
-            "type": "string",
-            "pattern": "^[0-9a-fA-F]{24}$",
-            "example": "665f1f77bcf86cd799439011"
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Category"
+              }
+            ],
+            "description": "Populated category document."
           },
           "owner": {
             "type": "string",
@@ -417,7 +406,7 @@
           "description",
           "ingredients",
           "instructions",
-          "categories",
+          "category",
           "photo"
         ],
         "properties": {
@@ -441,7 +430,7 @@
             "description": "Step-by-step cooking instructions.",
             "example": "Boil chicken, add vegetables, season and serve."
           },
-          "categories": {
+          "category": {
             "type": "string",
             "pattern": "^[0-9a-fA-F]{24}$",
             "example": "665f1f77bcf86cd799439011",
@@ -793,6 +782,33 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized. Missing, invalid, or expired session cookies.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingSession": {
+                    "value": {
+                      "message": "Missing session credentials"
+                    }
+                  },
+                  "sessionNotFound": {
+                    "value": {
+                      "message": "Session not found"
+                    }
+                  },
+                  "expired": {
+                    "value": {
+                      "message": "Access token expired"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "404": {
             "description": "User not found.",
             "content": {
@@ -842,6 +858,19 @@
               }
             }
           },
+          "404": {
+            "description": "No categories found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Categories not found"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error.",
             "content": {
@@ -878,6 +907,19 @@
               }
             }
           },
+          "404": {
+            "description": "No ingredients found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Ingredients not found"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error.",
             "content": {
@@ -900,7 +942,7 @@
           "Recipes"
         ],
         "summary": "Search recipes",
-        "description": "Searches recipes by category, ingredient, and title with pagination.",
+        "description": "Searches recipes by category, ingredient, title, max cooking time, and max calories, with pagination.",
         "parameters": [
           {
             "name": "page",
@@ -928,9 +970,10 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "example": "Breakfast"
+              "pattern": "^[0-9a-fA-F]{24}$",
+              "example": "665f1f77bcf86cd799439011"
             },
-            "description": "Category name."
+            "description": "Category ObjectId. Must reference an existing category."
           },
           {
             "name": "ingredient",
@@ -939,7 +982,7 @@
               "type": "string",
               "example": "Chicken"
             },
-            "description": "Ingredient name."
+            "description": "Ingredient name (case-insensitive, partial match). Matches recipes containing any ingredient whose name contains this substring; special regex characters are treated as literal text."
           },
           {
             "name": "search",
@@ -948,7 +991,27 @@
               "type": "string",
               "example": "soup"
             },
-            "description": "Case-insensitive search by recipe title."
+            "description": "Case-insensitive search by recipe title (partial match). Special regex characters are treated as literal text."
+          },
+          {
+            "name": "maxTime",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "example": 30
+            },
+            "description": "Maximum cooking time in minutes."
+          },
+          {
+            "name": "maxCalories",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "example": 500
+            },
+            "description": "Maximum calories per serving."
           }
         ],
         "responses": {
@@ -963,11 +1026,18 @@
             }
           },
           "400": {
-            "description": "Invalid category, ingredient not found, or validation error.",
+            "description": "Invalid category, ingredient not found, or query validation error (e.g. invalid page/perPage/maxTime/maxCalories).",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ValidationError"
+                    }
+                  ]
                 },
                 "examples": {
                   "invalidCategory": {
@@ -978,6 +1048,13 @@
                   "ingredientNotFound": {
                     "value": {
                       "message": "Ingredient not found"
+                    }
+                  },
+                  "queryValidation": {
+                    "value": {
+                      "statusCode": 400,
+                      "error": "Bad Request",
+                      "message": "\"maxTime\" must be a number"
                     }
                   }
                 }
@@ -1185,15 +1262,19 @@
             "name": "category",
             "in": "query",
             "schema": {
-              "type": "string"
-            }
+              "type": "string",
+              "pattern": "^[0-9a-fA-F]{24}$",
+              "example": "665f1f77bcf86cd799439011"
+            },
+            "description": "Category ObjectId."
           },
           {
             "name": "search",
             "in": "query",
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Case-insensitive search by recipe title (partial match). Special regex characters are treated as literal text."
           }
         ],
         "responses": {

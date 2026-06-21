@@ -22,16 +22,17 @@ const PORT = process.env.PORT ?? 3000;
 
 // Дозволені домени фронтенду
 const allowedOrigins = [
+  "https://final-project-fullstack-force-front.vercel.app",
+  "https://final-project-fullstack-force-back-r48i.onrender.com",
   "http://localhost:5173",
   "http://localhost:3000",
-  "https://final-project-fullstack-force-front.vercel.app",
 ];
 
 // CORS — просте та правильне налаштування
 app.use(
   cors({
     origin: allowedOrigins,
-    credentials: true, // дозволяємо куки
+    credentials: true,
   })
 );
 
@@ -48,16 +49,16 @@ app.use(cookieParser());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Маршрути API
-app.use("/api/auth", authRouter); // авторизація
-app.use("/api/user", usersRouter); // користувачі
-app.use("/api/categories", categoriesRouter); // категорії
-app.use("/api/ingredients", ingredientsRouter); // інгредієнти
-app.use("/api/recipes", recipesRouter); // рецепти
+app.use("/api/auth", authRouter);
+app.use("/api/user", usersRouter);
+app.use("/api/categories", categoriesRouter);
+app.use("/api/ingredients", ingredientsRouter);
+app.use("/api/recipes", recipesRouter);
 
-// Обробка 404 — маршрут не знайдено
+// Обробка 404
 app.use(notFoundHandler);
 
-// Помилки celebrate (валідація)
+// Помилки celebrate
 app.use(errors());
 
 // Глобальний обробник помилок

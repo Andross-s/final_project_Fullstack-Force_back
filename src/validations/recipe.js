@@ -15,8 +15,8 @@ export const createRecipeSchema = {
       .required(),
     instructions: Joi.string().required(),
 
-    // Додаємо categories (повинно збігатися з назвою поля в моделі)
-    categories: Joi.string().hex().length(24).required(),
+    // Назва поля має збігатися з полем у моделі (category, не categories)
+    category: Joi.string().hex().length(24).required(),
 
     thumb: Joi.string().uri().optional(),
     time: Joi.number().integer().min(1).optional(),
@@ -39,5 +39,7 @@ export const getRecipesSchema = {
     ingredient: Joi.string().trim().optional(),
     category: Joi.string().trim().optional(),
     search: Joi.string().trim().allow(""),
+    maxTime: Joi.number().integer().min(1).optional(),
+    maxCalories: Joi.number().min(0).optional(),
   }),
 };

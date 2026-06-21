@@ -6,6 +6,11 @@ export const createRecipeController = async (req, res, next) => {
   try {
     const { file, user } = req;
 
+    // Захист: переконатись, що middleware встановив req.user
+    if (!user || !user._id) {
+      return next(createHttpError(401, "Not authenticated"));
+    }
+
     // Проверяем, есть ли фото
     if (!file) {
       throw createHttpError(400, "Фото не загружено");

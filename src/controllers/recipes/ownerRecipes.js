@@ -1,5 +1,6 @@
-import { Recipe } from "../../models/recipe.js";
+import Recipe from "../../models/recipe.js";
 import { Categories } from "../../models/category.js";
+import { escapeRegExp } from "../../utils/escapeRegExp.js";
 
 export const getOwnerRecipes = async (req, res) => {
   try {
@@ -14,10 +15,10 @@ export const getOwnerRecipes = async (req, res) => {
     const limitNum = Math.max(1, Number(perPage));
     const skip = (pageNum - 1) * limitNum;
 
-    //  Базовий запит — рецепти користувача
+    // Базовий запит — рецепти користувача
     const query = { owner: req.user._id };
 
-    //  Фільтр за категорією
+    // Фільтр за категорією
     if (category) {
       const exists = await Categories.exists({ _id: category });
       if (!exists) {
@@ -26,9 +27,9 @@ export const getOwnerRecipes = async (req, res) => {
       query.category = category;
     }
 
-    //  Пошук за назвою
+    // Пошук за назвою
     if (search) {
-      query.title = { $regex: search, $options: "i" };
+      query.title = { $regex: escapeRegExp(search), $options: "i" };
     }
 
     const [totalRecipes, recipes] = await Promise.all([
@@ -55,3 +56,4 @@ export const getOwnerRecipes = async (req, res) => {
     res.status(500).json({ message: "Помилка сервера" });
   }
 };
+
