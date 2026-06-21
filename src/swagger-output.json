@@ -172,24 +172,6 @@
               "avatar": {
                 "type": "string",
                 "format": "uri"
-              },
-              "followers": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "pattern": "^[0-9a-fA-F]{24}$",
-                  "example": "665f1f77bcf86cd799439011"
-                },
-                "nullable": true
-              },
-              "following": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "pattern": "^[0-9a-fA-F]{24}$",
-                  "example": "665f1f77bcf86cd799439011"
-                },
-                "nullable": true
               }
             }
           }
@@ -340,7 +322,7 @@
             "nullable": true,
             "example": 320
           },
-          "categories": {
+          "category": {
             "type": "string",
             "pattern": "^[0-9a-fA-F]{24}$",
             "example": "665f1f77bcf86cd799439011"
@@ -417,7 +399,7 @@
           "description",
           "ingredients",
           "instructions",
-          "categories",
+          "category",
           "photo"
         ],
         "properties": {
@@ -441,7 +423,7 @@
             "description": "Step-by-step cooking instructions.",
             "example": "Boil chicken, add vegetables, season and serve."
           },
-          "categories": {
+          "category": {
             "type": "string",
             "pattern": "^[0-9a-fA-F]{24}$",
             "example": "665f1f77bcf86cd799439011",
@@ -927,7 +909,7 @@
           "Recipes"
         ],
         "summary": "Search recipes",
-        "description": "Searches recipes by category, ingredient, and title with pagination.",
+        "description": "Searches recipes by category, ingredient, title, max cooking time, and max calories, with pagination.",
         "parameters": [
           {
             "name": "page",
@@ -955,9 +937,10 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "example": "Breakfast"
+              "pattern": "^[0-9a-fA-F]{24}$",
+              "example": "665f1f77bcf86cd799439011"
             },
-            "description": "Category name."
+            "description": "Category ObjectId. Must reference an existing category."
           },
           {
             "name": "ingredient",
@@ -966,7 +949,7 @@
               "type": "string",
               "example": "Chicken"
             },
-            "description": "Ingredient name."
+            "description": "Ingredient name (case-insensitive, partial match)."
           },
           {
             "name": "search",
@@ -976,6 +959,26 @@
               "example": "soup"
             },
             "description": "Case-insensitive search by recipe title."
+          },
+          {
+            "name": "maxTime",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "example": 30
+            },
+            "description": "Maximum cooking time in minutes."
+          },
+          {
+            "name": "maxCalories",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "example": 500
+            },
+            "description": "Maximum calories per serving."
           }
         ],
         "responses": {
@@ -990,11 +993,18 @@
             }
           },
           "400": {
-            "description": "Invalid category, ingredient not found, or validation error.",
+            "description": "Invalid category, ingredient not found, or query validation error (e.g. invalid page/perPage/maxTime/maxCalories).",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ValidationError"
+                    }
+                  ]
                 },
                 "examples": {
                   "invalidCategory": {
@@ -1005,6 +1015,13 @@
                   "ingredientNotFound": {
                     "value": {
                       "message": "Ingredient not found"
+                    }
+                  },
+                  "queryValidation": {
+                    "value": {
+                      "statusCode": 400,
+                      "error": "Bad Request",
+                      "message": "\"maxTime\" must be a number"
                     }
                   }
                 }
@@ -1212,15 +1229,19 @@
             "name": "category",
             "in": "query",
             "schema": {
-              "type": "string"
-            }
+              "type": "string",
+              "pattern": "^[0-9a-fA-F]{24}$",
+              "example": "665f1f77bcf86cd799439011"
+            },
+            "description": "Category ObjectId."
           },
           {
             "name": "search",
             "in": "query",
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Case-insensitive search by recipe title."
           }
         ],
         "responses": {

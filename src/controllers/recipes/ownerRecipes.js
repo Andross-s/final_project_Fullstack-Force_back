@@ -31,7 +31,11 @@ export const getOwnerRecipes = async (req, res) => {
 
     const [totalRecipes, recipes] = await Promise.all([
         recipesQuery.clone().countDocuments(),
-        recipesQuery.skip(skip).limit(limit),
+        recipesQuery
+            .skip(skip)
+            .limit(limit)
+            .populate("ingredients.ingredient")
+            .populate("category"),
     ]);
 
     const totalPages = Math.ceil(totalRecipes / limit);
