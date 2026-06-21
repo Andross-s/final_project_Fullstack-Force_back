@@ -1,10 +1,10 @@
 import { Categories } from "../../models/category.js";
 import { Ingredient } from "../../models/ingredient.js";
-import Recipe from "../../models/recipe.js";
+import { Recipe } from "../../models/recipe.js";
 
 export const getRecipes = async (req, res) => {
   try {
-    // 📌 Отримуємо параметри запиту
+    //  Параметри запиту
     const {
       page = 1,
       perPage = 10,
@@ -15,97 +15,74 @@ export const getRecipes = async (req, res) => {
       maxCalories,
     } = req.query;
 
-    const pageNum = Number(page);
-    const limitNum = Number(perPage);
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.max(1, Number(perPage));
     const skip = (pageNum - 1) * limitNum;
 
-    // 📌 Основний фільтр
+    //  Основний фільтр
     const filter = {};
 
-    // ================================
-    // 🏷 ФІЛЬТР ЗА КАТЕГОРІЄЮ
-    // ================================
+    //  Фільтр за категорією
     if (category) {
       const exists = await Categories.exists({ _id: category });
-
       if (!exists) {
-        return res.status(400).json({ message: "Invalid category" });
+        return res.status(400).json({ message: "Невірна категорія" });
       }
-
       filter.category = category;
     }
 
-    // ================================
-    // 🧂 ФІЛЬТР ЗА ІНГРЕДІЄНТОМ
-    // ================================
+    //  Фільтр за інгредієнтом
     if (ingredient) {
-      // 1️⃣ Знаходимо інгредієнт за назвою
+      //  Пошук інгредієнта за назвою
       const ing = await Ingredient.findOne({
         name: { $regex: ingredient, $options: "i" },
       });
 
       if (!ing) {
-        return res.status(400).json({ message: "Ingredient not found" });
+        return res.status(400).json({ message: "Інгредієнт не знайдено" });
       }
 
-      // 2️⃣ Фільтруємо рецепти за ObjectId інгредієнта
       filter["ingredients.ingredient"] = ing._id;
     }
 
-    // ================================
-    // 🔍 ПОШУК ЗА НАЗВОЮ РЕЦЕПТА
-    // ================================
+    //  Пошук за назвою рецепта
     if (search) {
       filter.title = { $regex: search, $options: "i" };
     }
 
-    // ================================
-    // ⏱ ФІЛЬТР ЗА МАКС. ЧАСОМ
-    // ================================
+    //  Фільтр за часом
     if (maxTime) {
       filter.time = { $lte: Number(maxTime) };
     }
 
-    // ================================
-    // 🔥 ФІЛЬТР ЗА МАКС. КАЛОРІЯМИ
-    // ================================
+    //  Фільтр за калоріями
     if (maxCalories) {
       filter.calories = { $lte: Number(maxCalories) };
     }
 
-    // ================================
-    // 📌 ПАРАЛЕЛЬНІ ЗАПИТИ
-    // ================================
+    //  Паралельні запити
     const [totalRecipes, recipes] = await Promise.all([
       Recipe.countDocuments(filter),
       Recipe.find(filter)
         .skip(skip)
         .limit(limitNum)
-        .populate("ingredients.ingredient") // 🔥 додаємо назви інгредієнтів
-        .populate("category"), // 🔥 додаємо дані категорії
+        .populate("ingredients.ingredient")
+        .populate("category"),
     ]);
 
     const totalPages = Math.ceil(totalRecipes / limitNum);
 
-    // ================================
-    // 📌 ЧИ Є ЩЕ СТОРІНКИ?
-    // ================================
-    const hasMore = pageNum < totalPages;
-
-    // ================================
-    // 📌 ВІДПОВІДЬ
-    // ================================
     res.status(200).json({
       page: pageNum,
       perPage: limitNum,
       totalRecipes,
       totalPages,
-      hasMore, // 🔥 ДЛЯ Load More
+      hasMore: pageNum < totalPages,
       recipes,
     });
 
   } catch (error) {
     console.error("getRecipes error:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Помилка сервера" });
   }
 };

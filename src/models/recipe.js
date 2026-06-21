@@ -2,49 +2,51 @@ import { Schema, model } from "mongoose";
 
 const recipeSchema = new Schema(
   {
-    // 📝 Назва рецепта
+    // Назва рецепта
     title: { type: String, required: true },
 
-    // 🧾 Опис
+    // Короткий опис
     description: { type: String },
 
-    // 📖 Інструкція приготування
+    // Інструкція приготування
     instructions: { type: String },
 
-    // 🖼 Фото рецепта
+    // Фото
     thumb: {
       type: String,
       default:
         "https://res.cloudinary.com/dkiruwtcx/image/upload/q_auto/f_auto/v1781512091/Photo_dkn9mn.png",
     },
 
-    // ⏱ Час приготування
+    // Час приготування (хв)
     time: { type: Number },
 
-    // 🔥 Калорії
+    // Калорії
     calories: { type: Number, default: null },
 
-    // 🏷 Категорія (ВИПРАВЛЕНО: було categories)
+    // Категорія
     category: {
       type: Schema.Types.ObjectId,
-      ref: "category",
+      ref: "Category",
       required: true,
     },
 
-    // 👤 Власник рецепта
-    owner: { type: Schema.Types.ObjectId, ref: "user", default: null },
+    // Власник рецепта
+    owner: { type: Schema.Types.ObjectId, ref: "User", default: null },
 
-    // 🧂 Інгредієнти
+    // Інгредієнти
     ingredients: [
       {
-        ingredient: { type: Schema.Types.ObjectId, ref: "ingredient" },
+        ingredient: {
+          type: Schema.Types.ObjectId,
+          ref: "Ingredient",
+        },
         amount: { type: String },
       },
     ],
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
-const Recipe = model("recipe", recipeSchema);
-
-export default Recipe;
+// Модель рецепта
+export const Recipe = model("Recipe", recipeSchema);

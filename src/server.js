@@ -5,7 +5,7 @@ import "dotenv/config";
 import { errors } from "celebrate";
 import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
-import swaggerDocument from "./swagger-output.json" with { type: "json" };
+import swaggerDocument from "./swagger-output.json" assert { type: "json" };
 
 import { connectMongoDB } from "./db/connectMongoDB.js";
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -20,55 +20,58 @@ import recipesRouter from "./routes/recipesRouter.js";
 const app = express();
 const PORT = process.env.PORT ?? 3000;
 
+// Дозволені домени фронтенду
 const allowedOrigins = [
-  "https://vercel.app", // фронтенд на Vercel
-  "https://final-project-fullstack-force-back-r48i.onrender.com",
   "http://localhost:5173",
   "http://localhost:3000",
+  "https://final-project-fullstack-force-front.vercel.app",
 ];
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Дозволяємо запити без origin (наприклад, Postman або мобільні додатки)
-    // або якщо домен є у списку дозволених
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error("Blocked by CORS"));
-    }
-  },
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true, //фронтенд шле куки або сесії
-  optionsSuccessStatus: 204,
-};
+// CORS — просте та правильне налаштування
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true, // дозволяємо куки
+  })
+);
 
-// // Middleware
+// Базовий захист заголовків
 app.use(helmet());
+
+// Парсинг JSON
 app.use(express.json({ limit: "5mb" }));
-app.use(cors(corsOptions));
+
+// Парсинг cookies
 app.use(cookieParser());
 
+// Swagger документація
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.use("/api/auth", authRouter);
-app.use("/api/user", usersRouter);
-app.use("/api/categories", categoriesRouter);
-app.use("/api/ingredients", ingredientsRouter);
-app.use("/api/recipes", recipesRouter);
+// Маршрути API
+app.use("/api/auth", authRouter); // авторизація
+app.use("/api/user", usersRouter); // користувачі
+app.use("/api/categories", categoriesRouter); // категорії
+app.use("/api/ingredients", ingredientsRouter); // інгредієнти
+app.use("/api/recipes", recipesRouter); // рецепти
 
-// Middleware 404 (після всіх маршрутів)
+// Обробка 404 — маршрут не знайдено
 app.use(notFoundHandler);
 
-// обробка помилок від celebrate (валідація)
+// Помилки celebrate (валідація)
 app.use(errors());
 
-// Middleware для обробки помилок
+// Глобальний обробник помилок
 app.use(errorHandler);
 
-await connectMongoDB();
+// Підключення до MongoDB та запуск сервера
+try {
+  await connectMongoDB();
 
-// Запуск сервера
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Swagger UI available at http://localhost:${PORT}/api-docs`);
-});
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    console.log(`Swagger UI available at http://localhost:${PORT}/api-docs`);
+  });
+} catch (error) {
+  console.error("Failed to start server:", error);
+  process.exit(1);
+}

@@ -1,12 +1,18 @@
-import { User } from "../../models/user.js";
+import { Session } from "../../models/session.js";
 
 export const logout = async (req, res, next) => {
   try {
-    const userId = req.user._id;
+    const { sessionId } = req.cookies;
 
-    await User.findByIdAndUpdate(userId, { refreshToken: null });
+    // Видаляємо сесію з бази
+    if (sessionId) {
+      await Session.deleteOne({ _id: sessionId });
+    }
 
-    res.clearCookie("refreshToken");
+    // Очищаємо куки
+    res.clearCookie("sessionId", { secure: true, sameSite: "none" });
+    res.clearCookie("accessToken", { secure: true, sameSite: "none" });
+    res.clearCookie("refreshToken", { secure: true, sameSite: "none" });
 
     return res.status(204).send();
   } catch (error) {

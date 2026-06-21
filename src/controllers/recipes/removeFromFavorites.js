@@ -1,4 +1,5 @@
 import { User } from "../../models/user.js";
+import { Recipe } from "../../models/recipe.js";
 import createHttpError from "http-errors";
 
 export const removeFromFavorites = async (req, res, next) => {
@@ -6,18 +7,30 @@ export const removeFromFavorites = async (req, res, next) => {
     const userId = req.user._id;
     const { recipeId } = req.params;
 
-    const user = await User.findById(userId);
-
-    const inFavorites = user.favorites.some((id) => id.toString() === recipeId);
-
-    if (!inFavorites) {
-      throw createHttpError(404, "Recipe not found in favorites");
+    //  Перевіряємо, чи існує рецепт
+    const recipe = await Recipe.findById(recipeId);
+    if (!recipe) {
+      throw createHttpError(404, "Рецепт не знайдено");
     }
 
-    user.favorites = user.favorites.filter((id) => id.toString() !== recipeId);
+    const user = await User.findById(userId);
+
+    const exists = user.favorites.some(
+      (id) => id.toString() === recipeId
+    );
+
+    if (!exists) {
+      throw createHttpError(404, "Рецепта немає в улюблених");
+    }
+
+    user.favorites = user.favorites.filter(
+      (id) => id.toString() !== recipeId
+    );
+
     await user.save();
 
-    return res.status(200).json({ message: "Recipe removed from favorites" });
+    res.status(200).json({ message: "Видалено з улюблених" });
+
   } catch (error) {
     next(error);
   }

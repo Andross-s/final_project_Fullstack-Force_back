@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
 
+// Налаштування Cloudinary
 cloudinary.config({
   secure: true,
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -7,18 +8,19 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Завантаження файлу у Cloudinary
 export async function saveFileToCloudinary(buffer, publicId, uploadOptions = {}) {
+  // Базові параметри завантаження
   const options = {
-    folder: "/api/user/avatar",
-    public_id: `avatar_${publicId}`,
+    folder: "recipes", // Папка за замовчуванням
+    public_id: publicId, // Ідентифікатор файлу
     resource_type: "image",
-    overwrite: true,
-    unique_filename: false,
+    overwrite: false,
+    unique_filename: true,
     transformation: [
-      { width: 500, height: 500, crop: "fill", gravity: "auto" },
-      { fetch_format: "auto", quality: "auto" },
+      { fetch_format: "auto", quality: "auto" }, // Оптимізація зображення
     ],
-    ...uploadOptions,
+    ...uploadOptions, // Можливість перевизначити параметри
   };
 
   return new Promise((resolve, reject) => {
@@ -29,7 +31,7 @@ export async function saveFileToCloudinary(buffer, publicId, uploadOptions = {})
           return reject(error);
         }
         resolve(result);
-      },
+      }
     );
 
     uploadStream.end(buffer);

@@ -22,11 +22,13 @@ const userSchema = new Schema(
       type: String,
       default: "https://ac.goit.global/fullstack/react/default-avatar.jpg",
     },
-    favorites: [{ type: Schema.Types.ObjectId, ref: "recipe" }],
+
+    // Избранные рецепты
+    favorites: [{ type: Schema.Types.ObjectId, ref: "Recipe" }],
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 userSchema.methods.toJSON = function () {

@@ -1,55 +1,65 @@
-
 import createHttpError from "http-errors";
-import { User } from "../../models/user.js";
 import bcrypt from "bcrypt";
-import { createSession, setSessionCookies } from "../../services/auth.js";
-import { Session } from "../../models/session.js";
+import { User } from "../../models/user.js";
+import { createSession } from "../../services/auth.js";
 
-
-
-import path from 'path';
-
-export const registerUser = async (req, res, next) => {
-
+export const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
-
+  // Перевірка полів
   if (!name || !email || !password) {
     throw createHttpError(400, "All fields are required");
   }
 
- 
   if (password.length < 8) {
-    throw createHttpError(400, "Password must be at least 6 characters");
+    throw createHttpError(400, "Password must be at least 8 characters");
   }
 
-  
+  // Перевірка чи існує користувач
   const existingUser = await User.findOne({ email: email.toLowerCase() });
   if (existingUser) {
     throw createHttpError(400, "Email in use");
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10); 
+  // Хешування пароля
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-  
+  // Створення користувача
   const newUser = await User.create({
-    name: name,
+    name,
     email: email.toLowerCase(),
-    password: hashedPassword
+    password: hashedPassword,
   });
 
+  // Створення сесії
   const session = await createSession(newUser._id);
-  setSessionCookies(res, session);
 
-  
+  // Встановлення куків
+  res.cookie("sessionId", session._id.toString(), {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
+
+  res.cookie("accessToken", session.accessToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
+
+  res.cookie("refreshToken", session.refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
+
+  // Повертаємо користувача без пароля
   const userResponse = newUser.toObject();
   delete userResponse.password;
 
- 
   res.status(201).json({
     success: true,
     message: "Registration successful",
-    user: userResponse
+    user: userResponse,
   });
 };
-
