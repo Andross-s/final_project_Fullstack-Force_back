@@ -8,7 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "swagger": "node ./swagger.js"
+    "swagger": "node ./swagger.js",
+    "migrate:recipes": "node src/scripts/migrateRecipeCategoryId.js"
   },
   "repository": {
     "type": "git",

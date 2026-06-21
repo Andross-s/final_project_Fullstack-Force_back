@@ -22,8 +22,6 @@ export const getUserById = async (req, res, next) => {
         name: user.name,
         email: user.email,
         avatar: user.avatar,
-        followers: user.followers,
-        following: user.following,
       },
     });
   } catch (error) {

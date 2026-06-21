@@ -1,10 +1,6 @@
 import { Router } from "express";
 import { celebrate } from "celebrate";
 import { getRecipeById } from "../controllers/recipes/recipesById.js";
-import {
-  validateRecipeId,
-  validateCreateRecipe,
-} from "../validations/index.js";
 
 import { createRecipeController } from "../controllers/recipes/createRecipeController.js";
 import { createRecipeSchema } from "../validations/recipe.js"

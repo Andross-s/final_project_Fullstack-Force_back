@@ -103,7 +103,6 @@ export const getRecipes = async (req, res) => {
       hasMore, // 🔥 ДЛЯ Load More
       recipes,
     });
-
   } catch (error) {
     console.error("getRecipes error:", error);
     res.status(500).json({ message: "Server error" });

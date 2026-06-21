@@ -5,10 +5,6 @@ import bcrypt from "bcrypt";
 import { createSession, setSessionCookies } from "../../services/auth.js";
 import { Session } from "../../models/session.js";
 
-
-
-import path from 'path';
-
 export const registerUser = async (req, res, next) => {
 
   const { name, email, password } = req.body;
@@ -20,7 +16,7 @@ export const registerUser = async (req, res, next) => {
 
  
   if (password.length < 8) {
-    throw createHttpError(400, "Password must be at least 6 characters");
+    throw createHttpError(400, "Password must be at least 8 characters");
   }
 
   

@@ -22,7 +22,7 @@ const ingredientSchema = new Schema(
 );
 
 export const Ingredient = model(
-  "Ingredient",
+  "ingredient",
   ingredientSchema,
   "ingredients",
 );
