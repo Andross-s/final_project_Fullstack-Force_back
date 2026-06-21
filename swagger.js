@@ -104,13 +104,15 @@ const recipeQueryParameters = [
     name: "ingredient",
     in: "query",
     schema: { type: "string", example: "Chicken" },
-    description: "Ingredient name (case-insensitive, partial match).",
+    description:
+      "Ingredient name (case-insensitive, partial match). Matches recipes containing any ingredient whose name contains this substring; special regex characters are treated as literal text.",
   },
   {
     name: "search",
     in: "query",
     schema: { type: "string", example: "soup" },
-    description: "Case-insensitive search by recipe title.",
+    description:
+      "Case-insensitive search by recipe title (partial match). Special regex characters are treated as literal text.",
   },
   {
     name: "maxTime",
@@ -279,7 +281,12 @@ const doc = {
       RecipeIngredient: {
         type: "object",
         properties: {
-          ingredient: objectId,
+          ingredient: {
+            allOf: [{ $ref: "#/components/schemas/Ingredient" }],
+            nullable: true,
+            description:
+              "Populated ingredient document. May be null if the stored reference no longer matches an existing ingredient.",
+          },
           amount: { type: "string", example: "200 g" },
         },
       },
@@ -303,7 +310,10 @@ const doc = {
           },
           time: { type: "integer", example: 45 },
           calories: { type: "number", nullable: true, example: 320 },
-          category: objectId,
+          category: {
+            allOf: [{ $ref: "#/components/schemas/Category" }],
+            description: "Populated category document.",
+          },
           owner: { ...objectId, nullable: true },
           ingredients: {
             type: "array",
@@ -599,6 +609,15 @@ const doc = {
               },
             },
           },
+          404: {
+            description: "No categories found.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Error" },
+                example: { message: "Categories not found" },
+              },
+            },
+          },
           ...serverErrorResponse,
         },
       },
@@ -616,6 +635,15 @@ const doc = {
                   type: "array",
                   items: { $ref: "#/components/schemas/Ingredient" },
                 },
+              },
+            },
+          },
+          404: {
+            description: "No ingredients found.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Error" },
+                example: { message: "Ingredients not found" },
               },
             },
           },
@@ -757,7 +785,8 @@ const doc = {
             name: "search",
             in: "query",
             schema: { type: "string" },
-            description: "Case-insensitive search by recipe title.",
+            description:
+              "Case-insensitive search by recipe title (partial match). Special regex characters are treated as literal text.",
           },
         ],
         responses: {
