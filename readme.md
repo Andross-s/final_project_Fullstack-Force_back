@@ -59,11 +59,11 @@ npm run dev
 
 To run the backend locally, create a .env file in the root of the project (like .env.example) and fill it with your own keys:
 
-# Port on which the server will run
+### Port on which the server will run
 PORT=3000
-# Connection string to your MongoDB Atlas database
+### Connection string to your MongoDB Atlas database
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/db-name?retryWrites=true&w=majority
-# Cloudinary settings (to save images/avatars)
+### Cloudinary settings (to save images/avatars)
 CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
