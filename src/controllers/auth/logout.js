@@ -18,9 +18,10 @@ export const logout = async (req, res, next) => {
       await User.findByIdAndUpdate(req.user._id, { refreshToken: null });
     }
 
-    res.clearCookie("sessionId");
-    res.clearCookie("accessToken");
-    res.clearCookie("refreshToken");
+    // Очищаємо куки
+    res.clearCookie("sessionId", { secure: true, sameSite: "none" });
+    res.clearCookie("accessToken", { secure: true, sameSite: "none" });
+    res.clearCookie("refreshToken", { secure: true, sameSite: "none" });
 
     return res.status(204).send();
   } catch (error) {

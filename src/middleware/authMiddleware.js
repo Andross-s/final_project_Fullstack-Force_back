@@ -4,32 +4,29 @@ import { User } from "../models/user.js";
 
 export const authMiddleware = async (req, res, next) => {
   try {
-    const { sessionId, accessToken } = req.cookies ?? {};
+    const { sessionId, accessToken } = req.cookies;
 
+    // Перевірка наявності сесійних даних
     if (!sessionId || !accessToken) {
-      return next(createHttpError(401, "Unauthorized"));
+      throw createHttpError(401, "Відсутні дані сесії");
     }
 
+    // Пошук сесії
     const session = await Session.findOne({ _id: sessionId, accessToken });
-
     if (!session) {
-      return next(createHttpError(401, "Session not found"));
+      throw createHttpError(401, "Сесію не знайдено");
     }
 
-    if (
-      session.accessTokenValidUntil &&
-      session.accessTokenValidUntil < new Date()
-    ) {
-      await session.deleteOne();
-      res.clearCookie("sessionId");
-      res.clearCookie("accessToken");
-      res.clearCookie("refreshToken");
-      return next(createHttpError(401, "Access token expired"));
+    // Перевірка строку дії токена
+    const isExpired = session.accessTokenValidUntil < new Date();
+    if (isExpired) {
+      throw createHttpError(401, "Термін дії токена минув");
     }
 
+    // Пошук користувача
     const user = await User.findById(session.userId);
     if (!user) {
-      return next(createHttpError(401, "User not found"));
+      throw createHttpError(401, "Користувача не знайдено");
     }
 
     req.user = user;

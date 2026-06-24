@@ -7,11 +7,12 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const usersRouter = Router();
 
+// Отримати дані користувача за ID
 usersRouter.get(
   "/:userId",
   authMiddleware,
   celebrate(getUserByIdSchema),
-  getUserById,
+  getUserById
 );
 
 export default usersRouter;

@@ -1,52 +1,59 @@
-import Recipe from '../../models/recipe.js';
-import createHttpError from 'http-errors';
-import { escapeRegExp } from '../../utils/escapeRegExp.js';
+import Recipe from "../../models/recipe.js";
+import { Categories } from "../../models/category.js";
+import { escapeRegExp } from "../../utils/escapeRegExp.js";
 
 export const getOwnerRecipes = async (req, res) => {
-
+  try {
     const {
-        page = 1,
-        perPage = 12,
-        category,
-        search,
+      page = 1,
+      perPage = 12,
+      category,
+      search,
     } = req.query;
-    const skip = (page - 1) * perPage;
-    const limit = perPage;
 
-    // пошук рецепта за ID поточного залогіненого користувача
-    const recipesQuery = Recipe.find({
-        owner: req.user._id,
-    });
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.max(1, Number(perPage));
+    const skip = (pageNum - 1) * limitNum;
 
-    // пошук за категорією
+    // Базовий запит — рецепти користувача
+    const query = { owner: req.user._id };
+
+    // Фільтр за категорією
     if (category) {
-        recipesQuery.where("category").equals(category);
+      const exists = await Categories.exists({ _id: category });
+      if (!exists) {
+        return res.status(400).json({ message: "Невірна категорія" });
+      }
+      query.category = category;
     }
 
-    // пошук за пошуковим запитом
+    // Пошук за назвою
     if (search) {
-        recipesQuery.where({
-            title: { $regex: escapeRegExp(search), $options: "i" },
-        });
+      query.title = { $regex: escapeRegExp(search), $options: "i" };
     }
 
     const [totalRecipes, recipes] = await Promise.all([
-        recipesQuery.clone().countDocuments(),
-        recipesQuery
-            .skip(skip)
-            .limit(limit)
-            .populate("ingredients.ingredient")
-            .populate("category"),
+      Recipe.countDocuments(query),
+      Recipe.find(query)
+        .skip(skip)
+        .limit(limitNum)
+        .populate("category")
+        .populate("ingredients.ingredient"),
     ]);
 
-    const totalPages = Math.ceil(totalRecipes / limit);
+    const totalPages = Math.ceil(totalRecipes / limitNum);
 
-    // відповідь
     res.status(200).json({
-        page: Number(page),
-        perPage: Number(perPage),
-        totalRecipes,
-        totalPages,
-        recipes,
+      page: pageNum,
+      perPage: limitNum,
+      totalRecipes,
+      totalPages,
+      recipes,
     });
+
+  } catch (error) {
+    console.error("getOwnerRecipes error:", error);
+    res.status(500).json({ message: "Помилка сервера" });
+  }
 };
+
