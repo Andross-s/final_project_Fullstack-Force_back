@@ -4,6 +4,8 @@ import helmet from "helmet";
 import "dotenv/config";
 import { errors } from "celebrate";
 import cookieParser from "cookie-parser";
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "./swagger-output.json" with { type: "json" };
 
 import { connectMongoDB } from "./db/connectMongoDB.js";
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -18,17 +20,35 @@ import recipesRouter from "./routes/recipesRouter.js";
 const app = express();
 const PORT = process.env.PORT ?? 3000;
 
-// // Middleware
+const allowedOrigins = [
+  "https://final-project-fullstack-force-front.vercel.app", // фронтенд на Vercel
+  "https://final-project-fullstack-force-back-r48i.onrender.com",
+  "http://localhost:5173",
+  "http://localhost:3000",
+];
 
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Дозволяємо запити без origin (наприклад, Postman або мобільні додатки)
+    // або якщо домен є у списку дозволених
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Blocked by CORS"));
+    }
+  },
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true, //фронтенд шле куки або сесії
+  optionsSuccessStatus: 204,
+};
+
+// // Middleware
 app.use(helmet());
 app.use(express.json({ limit: "5mb" }));
-app.use(
-  cors({
-    methods: ["GET", "POST", "PATCH", "DELETE"],
-    origin: "*",
-  }),
-);
+app.use(cors(corsOptions));
 app.use(cookieParser());
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", usersRouter);
@@ -45,9 +65,16 @@ app.use(errors());
 // Middleware для обробки помилок
 app.use(errorHandler);
 
+app.use((err, req, res, next) => {
+  console.error("[ERROR]", err);
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({ message: err.message || "Internal Server Error" });
+});
+
 await connectMongoDB();
 
 // Запуск сервера
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log(`Swagger UI available at http://localhost:${PORT}/api-docs`);
 });

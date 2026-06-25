@@ -7,10 +7,10 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export async function saveFileToCloudinary(buffer, userId) {
+export async function saveFileToCloudinary(buffer, publicId, uploadOptions = {}) {
   const options = {
     folder: "/api/user/avatar",
-    public_id: `avatar_${userId}`,
+    public_id: `avatar_${publicId}`,
     resource_type: "image",
     overwrite: true,
     unique_filename: false,
@@ -18,6 +18,7 @@ export async function saveFileToCloudinary(buffer, userId) {
       { width: 500, height: 500, crop: "fill", gravity: "auto" },
       { fetch_format: "auto", quality: "auto" },
     ],
+    ...uploadOptions,
   };
 
   return new Promise((resolve, reject) => {

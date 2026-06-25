@@ -1,5 +1,6 @@
 import Recipe from '../../models/recipe.js';
 import createHttpError from 'http-errors';
+import { escapeRegExp } from '../../utils/escapeRegExp.js';
 
 export const getOwnerRecipes = async (req, res) => {
 
@@ -25,13 +26,17 @@ export const getOwnerRecipes = async (req, res) => {
     // пошук за пошуковим запитом
     if (search) {
         recipesQuery.where({
-            title: { $regex: search, $options: "i" },
+            title: { $regex: escapeRegExp(search), $options: "i" },
         });
     }
 
     const [totalRecipes, recipes] = await Promise.all([
         recipesQuery.clone().countDocuments(),
-        recipesQuery.skip(skip).limit(limit),
+        recipesQuery
+            .skip(skip)
+            .limit(limit)
+            .populate("ingredients.ingredient")
+            .populate("category"),
     ]);
 
     const totalPages = Math.ceil(totalRecipes / limit);

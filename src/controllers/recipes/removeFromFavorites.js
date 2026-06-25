@@ -8,7 +8,9 @@ export const removeFromFavorites = async (req, res, next) => {
 
     const user = await User.findById(userId);
 
-    if (!user.favorites.includes(recipeId)) {
+    const inFavorites = user.favorites.some((id) => id.toString() === recipeId);
+
+    if (!inFavorites) {
       throw createHttpError(404, "Recipe not found in favorites");
     }
 
