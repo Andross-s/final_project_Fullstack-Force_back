@@ -18,6 +18,8 @@ import { getRecipesSchema } from "../validations/recipe.js";
 import { getOwnerRecipes } from "../controllers/recipes/ownerRecipes.js";
 import { getOwnerRecipesSchema } from "../validations/recipe.js";
 
+import { deleteRecipe } from "../controllers/recipes/deleteRecipe.js";
+
 const recipesRouter = Router();
 
 recipesRouter.get(
@@ -45,5 +47,6 @@ recipesRouter.post(
 );
 
 recipesRouter.get("/:id", getRecipeById);
+recipesRouter.delete("/:id", authMiddleware, deleteRecipe);
 
 export default recipesRouter;

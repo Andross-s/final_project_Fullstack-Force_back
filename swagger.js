@@ -758,6 +758,53 @@ const doc = {
           ...serverErrorResponse,
         },
       },
+      delete: {
+        tags: ["Own Recipes"],
+        summary: "Delete own recipe",
+        description:
+          "Deletes a recipe owned by the authenticated user. Returns 403 if the recipe belongs to another user.",
+        security: [{ sessionIdCookie: [], accessTokenCookie: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: objectId,
+            description: "Recipe id.",
+          },
+        ],
+        responses: {
+          200: {
+            description: "Recipe deleted successfully.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/MessageResponse" },
+                example: { message: "Recipe deleted successfully" },
+              },
+            },
+          },
+          403: {
+            description: "Recipe belongs to another user.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Error" },
+                example: { message: "You are not allowed to delete this recipe" },
+              },
+            },
+          },
+          404: {
+            description: "Recipe not found.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Error" },
+                example: { message: "Recipe not found" },
+              },
+            },
+          },
+          ...unauthorizedResponses,
+          ...serverErrorResponse,
+        },
+      },
     },
     "/api/recipes/own": {
       get: {
